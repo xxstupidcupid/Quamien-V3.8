@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quamien Simulator v3.6 — United Provinces of Quamien — Government Portal</title>
+<style>
+:root{--bg:#0d1420;--panel:#151f2e;--panel2:#1b293a;--line:#2a3a4e;--text:#edf3fa;--muted:#9aabc0;--accent:#a78bfa;--good:#55c59a;--bad:#ef7979;--gold:#e5bd67}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:22px 28px;background:linear-gradient(115deg,#19263a,#22213c);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:13px}.seal{width:46px;height:46px;border:1px solid #8574bc;border-radius:50%;display:grid;place-items:center;color:#d9ccff;font-size:23px}
+h1{font-size:19px;margin:0;letter-spacing:.04em}.sub{color:var(--muted);font-size:12px}.header-right{color:var(--muted);text-align:right;font-size:12px}
+nav{display:flex;gap:6px;padding:12px 22px;background:#101a28;border-bottom:1px solid var(--line);overflow:auto}
+nav button{background:transparent;color:var(--muted);border:0;padding:10px 13px;border-radius:7px;white-space:nowrap;cursor:pointer;font-weight:600}
+nav button.active,nav button:hover{background:var(--panel2);color:var(--text)}
+main{max-width:1440px;margin:auto;padding:24px}.view{display:none}.view.active{display:block}
+h2{font-size:21px;margin:0 0 5px}h3{font-size:15px;margin:0 0 13px}.intro{color:var(--muted);margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:17px;min-width:0}.metric{font-size:25px;font-weight:700;margin:7px 0 2px}.muted{color:var(--muted)}.small{font-size:12px}.positive{color:var(--good)}.negative{color:var(--bad)}
+.section{margin-top:20px}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.btn{background:#6e5ab2;color:white;border:0;border-radius:7px;padding:9px 13px;cursor:pointer;font-weight:600}.btn.secondary{background:#26364a;color:var(--text);border:1px solid var(--line)}.btn.danger{background:#853f4a}.btn:hover{filter:brightness(1.12)}
+input,select,textarea{background:#0f1927;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:9px;width:100%;font:inherit}textarea{min-height:76px;resize:vertical}label{display:block;color:var(--muted);font-size:12px;margin:9px 0 5px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px 9px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}td input,td select{min-width:82px;padding:6px}
+.party{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;color:#111}.CRP{background:#a78bfa}.CIP{background:#e8c65c}.LLC{background:#6ba9ee}.SPQ{background:#ed7777}.NGP{background:#70c78c}
+.bar{height:9px;background:#26364a;border-radius:9px;overflow:hidden}.bar span{display:block;height:100%;background:var(--accent)}
+.newsitem{padding:12px 0;border-bottom:1px solid var(--line)}.newsitem:last-child{border:0}.newsitem strong{display:block;margin-bottom:3px}
+.pill{font-size:11px;color:var(--gold);border:1px solid #6d5932;border-radius:20px;padding:2px 7px}
+.footer{padding:22px;text-align:center;color:var(--muted);font-size:11px}
+.empty{color:var(--muted);padding:18px;text-align:center;border:1px dashed var(--line);border-radius:8px}
+.vote-slider-row{padding:12px 0;border-bottom:1px solid var(--line)}.vote-slider-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.vote-slider input[type=range]{padding:0;accent-color:var(--good);cursor:pointer}.vote-slider-stats{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.vote-slider-stats strong{color:var(--text)}.vote-slider-note{font-size:12px;color:var(--muted);margin-top:8px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){header{padding:17px}.header-right{display:none}main{padding:15px}.grid,.grid.two,.formgrid{grid-template-columns:1fr}.metric{font-size:22px}}
+
+.market-chart{width:100%;min-height:230px;overflow:hidden;margin-top:10px}.market-chart svg{display:block;width:100%;height:auto;min-height:210px}.chart-grid{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}.chart-line{fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.chart-area{fill:var(--accent);opacity:.12}.chart-label{fill:var(--muted);font-size:10px}.chart-empty{display:grid;place-items:center;min-height:210px;color:var(--muted);text-align:center;padding:20px}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="seal">Π</div><div><h1>UNITED PROVINCES OF QUAMIEN</h1><div class="sub">OFFICE OF THE COUNCILLOR · NATIONAL GOVERNMENT PORTAL</div></div></div>
+ <div class="header-right"><div>QUAMIENIAN PRIM · Π</div><div id="today"></div><div class="pill">FICTIONAL GOVERNMENT SIMULATOR</div></div>
+</header>
+<nav id="nav">
+ <button class="active" data-view="overview">Overview</button><button data-view="assembly">National Assembly</button><button data-view="economy">Economy</button><button data-view="market">Stock Exchange</button><button data-view="elections">Elections & Polling</button><button data-view="opinion">Public Opinion</button><button data-view="news">Newsroom</button><button data-view="events">Event Cycle</button><button data-view="settings">Data & Settings</button>
+</nav>
+<main>
+<section id="overview" class="view active">
+ <h2>National Overview</h2><p class="intro">A consolidated view of the United Provinces of Quamien. Edit figures and records in the relevant sections.</p>
+ <div class="grid" id="overviewMetrics"></div>
+ <div class="grid two section">
+  <div class="card"><h3>National Assembly · 475 seats</h3><div id="seatBars"></div></div>
+  <div class="card"><h3>Latest Government Developments</h3><div id="latestNews"></div></div>
+ </div>
+ <div class="card section"><h3>Government at a glance</h3><div class="grid two">
+ <div><div class="muted small">Head of government</div><strong>34th Councillor Daríon Provençal</strong></div>
+ <div><div class="muted small">Legislature</div><strong>Unicameral National Assembly</strong></div>
+ <div><div class="muted small">Legislative presiding officer</div><strong>Presiding Delegate</strong></div>
+ <div><div class="muted small">Currency</div><strong>Quamienian Prim (Π) · Pisto (π)</strong></div>
+ </div></div>
+</section>
+
+<section id="assembly" class="view">
+ <h2>National Assembly</h2><p class="intro">Create a bill and record a roll-call vote. Passage threshold is 238 affirmative votes (a majority of 475 seats).</p>
+ <div class="grid" id="voteMetrics"></div>
+ <div class="grid two section">
+  <div class="card"><h3>Create / edit a bill</h3>
+   <label>Bill title</label><input id="billTitle" placeholder="e.g. Public Housing, Utilities, and Cost of Living Act">
+   <label>Bill description</label><textarea id="billDesc" placeholder="Purpose and key provisions"></textarea>
+   <div class="toolbar"><button class="btn" id="addBill">Save bill</button><select id="billSelect" aria-label="Select bill"></select></div>
+   <div class="muted small">Select a bill below to enter its party or member vote totals.</div>
+  </div>
+  <div class="card"><h3>Current bill result</h3><div id="billResult" class="empty">Create or select a bill to view its tally.</div></div>
+ </div>
+ <div class="card section"><h3>Party vote breakdown</h3><p class="muted small">Enter Yea, Nay, and Abstain counts for each party. Each party's total must not exceed its seat allocation.</p>
+ <div style="overflow:auto"><table><thead><tr><th>Party</th><th>Seats</th><th>Yea</th><th>Nay</th><th>Abstain</th><th>Not voting</th></tr></thead><tbody id="voteRows"></tbody></table></div>
+ <div class="toolbar"><button class="btn" id="saveVotes">Save roll call</button><button class="btn secondary" id="clearVotes">Clear current tally</button></div></div>
+ <div class="card section"><h3>Party vote sliders</h3>
+  <p class="muted small">Adjust each party's Yea share among its already-decided Yea and Nay votes. Increasing Yea automatically decreases Nay by the same number. Abstentions and not-voting seats remain unchanged. Enter an initial Yea/Nay split in the table above and save it to activate that party's slider.</p>
+  <div id="voteSliders"></div>
+ </div>
+ <div class="card section"><h3>Party seat allocation</h3><div id="partySeats"></div></div>
+</section>
+
+<section id="economy" class="view">
+ <h2>National Economy</h2><p class="intro">Maintain Quamien's fictional macroeconomic indicators. Values are saved in this browser.</p>
+ <div class="grid" id="economyMetrics"></div>
+ <div class="card section"><h3>Update economic indicators</h3><div class="formgrid">
+ <div><label>GDP (Π billion)</label><input id="gdp" type="number" step=".001"></div>
+ <div><label>GDP change (%)</label><input id="gdpChange" type="number" step=".01"></div>
+ <div><label>Industrial production (%)</label><input id="industrial" type="number" step=".01"></div>
+ <div><label>Manufacturing demand (%)</label><input id="manufacturing" type="number" step=".01"></div>
+ <div><label>Average consumer spending (Π)</label><input id="spending" type="number" step="1"></div>
+ <div><label>Inflation (%)</label><input id="inflation" type="number" step=".01"></div>
+ <div><label>Average fuel price (Π / gallon)</label><input id="fuel" type="number" step=".01"></div>
+ </div><div class="toolbar"><button class="btn" id="saveEconomy">Save economic data</button></div></div>
+</section>
+
+<section id="elections" class="view">
+ <h2>Elections & Polling</h2><p class="intro">Track national polling, party support, and provincial political leanings.</p>
+ <div class="card"><h3>National polling averages</h3><div id="pollBars"></div>
+ <div class="formgrid section" id="pollInputs"></div><div class="toolbar"><button class="btn" id="savePolls">Save polling averages</button></div></div>
+ <div class="card section"><h3>Provincial political map key / classifications</h3><p class="muted small">Record a province's current political leaning. Edit names or classifications as your world evolves.</p>
+ <div style="overflow:auto"><table><thead><tr><th>Province</th><th>Region</th><th>Political classification</th></tr></thead><tbody id="provinceRows"></tbody></table></div>
+ <div class="toolbar"><button class="btn" id="saveProvinces">Save provincial classifications</button></div></div>
+</section>
+
+
+
+<section id="opinion" class="view">
+ <h2>Public Quamienian Opinion Poll</h2>
+ <p class="intro">A simulated national survey that evolves with breaking news, developing events, and public reactions to legislation. All figures are fictional model data.</p>
+ <div class="grid" id="opinionMetrics"></div>
+ <div class="grid two section">
+  <div class="card"><h3>National party preference</h3><div id="opinionNational"></div></div>
+  <div class="card"><h3>Public support for legislation</h3>
+   <label>Select a bill</label><select id="opinionBillSelect"></select>
+   <div id="opinionBillSummary" class="empty">Create a bill in the National Assembly to track public support.</div>
+   <div id="billSupportControls" class="section">
+    <label>Public support <strong id="billSupportValue">50.0%</strong></label>
+    <input id="billSupportSlider" type="range" min="0" max="100" step=".5" value="50" disabled>
+    <div class="bar"><span id="billSupportBar" style="width:50%"></span></div>
+    <div class="toolbar"><button class="btn secondary" id="saveBillSupport" disabled>Record public support</button></div>
+    <div id="billSupportHistory" class="muted small">Select a bill to record public support over time.</div>
+   </div>
+  </div>
+ </div>
+ <div class="card section"><h3>Public opinion on news headlines</h3>
+  <p class="muted small">Select a published headline from the Quamien Newsroom and record how the public responds to its framing or reported development.</p>
+  <label>News headline</label><select id="headlinePollSelect"></select>
+  <div id="headlinePollDisplay" class="empty">Publish a news item to begin polling public reaction.</div>
+  <div class="section">
+   <label>Favorable reaction <strong id="headlineFavorableValue">33.3%</strong></label>
+   <input id="headlineFavorable" type="range" min="0" max="100" step=".1" value="33.3">
+   <label>Neutral / unsure <strong id="headlineNeutralValue">33.4%</strong></label>
+   <input id="headlineNeutral" type="range" min="0" max="100" step=".1" value="33.4">
+   <div style="margin-top:14px;padding:12px;background:#0f1927;border:1px solid var(--line);border-radius:8px">
+    <div style="display:flex;justify-content:space-between;gap:10px"><span>Unfavorable reaction (calculated)</span><strong id="headlineUnfavorableValue">33.3%</strong></div>
+    <div class="bar" style="margin-top:8px"><span id="headlineUnfavorableBar" style="width:33.3%;background:#ef7979"></span></div>
+    <div class="muted small" style="margin-top:6px">Increasing favorable reactions automatically reduces unfavorable reactions, while neutral responses stay at their selected level. The three categories always total 100%.</div>
+   </div>
+   <input id="headlineUnfavorable" type="hidden" value="33.3">
+   <div class="formgrid" style="margin-top:10px"><div><label>Headline poll sample size</label><input id="headlineSampleSize" type="number" min="1" step="1" value="1200"></div></div>
+  </div>
+  <div class="toolbar"><button class="btn" id="saveHeadlinePoll">Save headline poll</button></div>
+  <p class="muted small">Favorable, unfavorable, and neutral responses must total 100%. These are fictional simulated survey results.</p>
+ </div>
+ <div class="card section"><h3>Demographic polling breakdown</h3>
+  <p class="muted small">Select a demographic dimension to compare party preference and support for the selected bill among different respondent groups.</p>
+  <div class="toolbar"><select id="demographicDimension"><option value="ethnicity">Ethnicity</option><option value="age">Age</option><option value="gender">Gender</option><option value="education">Education</option><option value="region">Region</option></select></div>
+  <div id="demographicTable" style="overflow:auto"></div>
+ </div>
+ <div class="card section"><h3>Polling methodology & survey record</h3>
+  <div class="grid two">
+   <div><div class="muted small">Illustrative sample size</div><strong id="opinionSample">1,200 respondents</strong></div>
+   <div><div class="muted small">Latest survey wave</div><strong id="opinionWave">Cycle 1</strong></div>
+   <div><div class="muted small">Population</div><strong>Quamienian voting-age public</strong></div>
+   <div><div class="muted small">Data status</div><strong>Fictional simulated polling</strong></div>
+  </div>
+  <p class="muted small section">These are internally generated estimates for world-building, not real survey results. Demographic categories are descriptive groupings in the fictional setting. They do not imply that ethnicity, age, gender, or education determines an individual's political views.</p>
+ </div>
+</section>
+
+<section id="market" class="view">
+ <h2>Quamien Stock Exchange</h2><p class="intro">A fictional domestic exchange influenced by real-world global equity benchmarks and Quamien's own economic performance. Share prices update whenever a national cycle advances.</p>
+ <div class="grid" id="marketMetrics"></div>
+ <div class="grid two section">
+  <div class="card"><h3>Global market pulse</h3><p class="muted small">Latest available benchmark movement from Yahoo Finance market data. The feed requires an internet connection; if unavailable, the simulator uses its last saved benchmark snapshot and clearly labels it.</p><div id="globalMarketRows"></div><div class="toolbar"><button class="btn secondary" id="refreshGlobalMarkets">Refresh global market data</button></div><div id="marketFeedStatus" class="muted small"></div></div>
+  <div class="card"><h3>Quamien Composite Index (QCI)</h3><div class="metric" id="qciValue">—</div><div id="qciChange" class="muted small">Cycle performance</div><p class="muted small section">The QCI tracks the weighted performance of listed Quamienian companies. Global market returns influence sector performance; domestic inflation, GDP growth, production, and fuel costs add local pressure.</p></div>
+ </div>
+ <div class="grid two section">
+  <div class="card"><h3>Quamien Composite Index history</h3><p class="muted small">Cycle-by-cycle movement of the domestic market index.</p><div id="qciChart" class="market-chart" role="img" aria-label="Quamien Composite Index historical chart"></div></div>
+  <div class="card"><h3>Company share-price history</h3><p class="muted small">Select a listed company to inspect its simulated share-price trend.</p><label for="stockChartSelect">Listed company</label><select id="stockChartSelect"></select><div id="stockPriceChart" class="market-chart" role="img" aria-label="Selected company share price history"></div></div>
+ </div>
+ <div class="card section"><h3>Listed Quamienian companies</h3><p class="muted small">Fictional securities priced in Quamienian Prim (Π). Percent changes reflect the latest simulation cycle, not actual exchange-traded securities.</p><div style="overflow:auto"><table><thead><tr><th>Company / ticker</th><th>Sector</th><th>Share price</th><th>Change</th><th>Market cap</th></tr></thead><tbody id="tickerRows"></tbody></table></div></div>
+ <div class="card section"><h3>Market methodology</h3><p class="muted small">Global reference markets: S&P 500, Nasdaq Composite, FTSE 100, Nikkei 225, Hang Seng, and EURO STOXX 50. Sector sensitivities vary by company. Local conditions and event-driven news can amplify or offset global movements. Market prices are fictional simulation values; global benchmarks are real-world reference data.</p></div>
+</section>
+
+<section id="events" class="view">
+ <h2>National Event Cycle</h2><p class="intro">Create developing national events that immediately affect the economy and polling, then continue to shape the country as simulation cycles advance.</p>
+ <div class="grid" id="cycleMetrics"></div>
+ <div class="grid two section">
+  <div class="card"><h3>Develop a national event</h3>
+   <label>Event headline</label><input id="eventTitle" placeholder="e.g. National Energy Supply Crisis">
+   <label>Category</label><select id="eventCategory"><option>Economy</option><option>Politics</option><option>Foreign Affairs</option><option>Public Safety</option><option>Social Policy</option><option>Infrastructure</option><option>Environment</option></select>
+   <label>News report / event details</label><textarea id="eventBody" placeholder="Describe what happened, who is involved, and why it matters..."></textarea>
+   <label>Duration (additional cycles)</label><input id="eventDuration" type="number" min="1" max="99" value="3">
+   <p class="muted small">Immediate effects are applied when you publish. Ongoing effects are applied each time you advance the national cycle, until the event expires.</p>
+   <h3 class="section">Immediate economic effects</h3>
+   <div class="formgrid">
+    <div><label>GDP growth change (percentage points)</label><input id="imGDP" type="number" step=".1" value="0"></div>
+    <div><label>Inflation change (points)</label><input id="imInflation" type="number" step=".1" value="0"></div>
+    <div><label>Industrial production change (points)</label><input id="imIndustrial" type="number" step=".1" value="0"></div>
+    <div><label>Manufacturing demand change (points)</label><input id="imManufacturing" type="number" step=".1" value="0"></div>
+    <div><label>Consumer spending change (Π)</label><input id="imSpending" type="number" step="100" value="0"></div>
+    <div><label>Fuel price change (Π / gallon)</label><input id="imFuel" type="number" step=".01" value="0"></div>
+   </div>
+   <h3 class="section">Immediate polling effects</h3>
+   <p class="muted small">Enter percentage-point changes. The simulator redistributes the polling shares proportionally so the national total remains 100%.</p>
+   <div class="formgrid" id="eventPollInputs"></div>
+   <h3 class="section">Legislative public-opinion effects</h3>
+   <label>Bill affected (optional)</label><select id="eventBillSelect"><option value="">No specific bill</option></select>
+   <div class="formgrid">
+    <div><label>Immediate public support change (points)</label><input id="billSupportImmediate" type="number" step=".1" value="0"></div>
+    <div><label>Ongoing public support change / cycle</label><input id="billSupportOngoing" type="number" step=".1" value="0"></div>
+   </div>
+   <h3 class="section">Ongoing effects per cycle</h3>
+   <div class="formgrid">
+    <div><label>GDP growth change (points / cycle)</label><input id="onGDP" type="number" step=".1" value="0"></div>
+    <div><label>Inflation change (points / cycle)</label><input id="onInflation" type="number" step=".1" value="0"></div>
+    <div><label>Fuel price change (Π / cycle)</label><input id="onFuel" type="number" step=".01" value="0"></div>
+   </div>
+   <label>Ongoing polling shift per cycle (percentage points)</label>
+   <div class="formgrid" id="eventOngoingPollInputs"></div>
+   <div class="toolbar"><button class="btn" id="publishEvent">Publish event & apply effects</button></div>
+  </div>
+  <div class="card"><h3>National cycle controls</h3>
+   <p class="muted">Advancing a cycle applies the ongoing effects of every active event once. Events expire automatically when their remaining duration reaches zero.</p>
+   <div class="metric" id="cycleNumber">Cycle 1</div>
+   <button class="btn" id="advanceCycle">Advance national cycle</button>
+   <div class="section"><h3>Active developing events</h3><div id="activeEvents"></div></div>
+  </div>
+ </div>
+ <div class="card section"><h3>Event impact history</h3><div id="eventHistory"></div></div>
+</section>
+
+<section id="news" class="view">
+ <h2>Quamien Newsroom</h2><p class="intro">Write and maintain fictional news reports, official statements, and political developments.</p>
+ <div class="grid two">
+  <div class="card"><h3>Publish a news item</h3><label>Headline</label><input id="newsTitle" placeholder="Enter headline"><label>Category</label><select id="newsCategory"><option>Politics</option><option>Economy</option><option>Foreign Affairs</option><option>Public Safety</option><option>Society</option><option>Government Statement</option></select><label>Story</label><textarea id="newsBody" placeholder="Write the report..."></textarea><div class="toolbar"><button class="btn" id="publishNews">Publish item</button></div></div>
+  <div class="card"><h3>Editorial desk</h3><p class="muted">Use this space as a running archive of events in Quamien. News items can be removed individually, and all data can be exported from Data & Settings.</p><div class="pill">LOCAL ARCHIVE</div></div>
+ </div>
+ <div class="card section" id="breakingNewsDesk">
+  <h3>Breaking News</h3>
+  <p class="muted small">Breaking News applies immediate economic and stock-market shocks when published, then continues to apply its ongoing effects once per simulation cycle until its duration ends.</p>
+  <div class="grid two">
+   <div><label>Breaking headline</label><input id="breakingTitle" placeholder="Enter breaking-news headline"></div>
+   <div><label>Category</label><select id="breakingCategory"><option>Economy</option><option>International Affairs</option><option>Politics</option><option>Conflict & Security</option><option>Energy</option><option>Technology & Cybersecurity</option><option>Corporate & Finance</option></select></div>
+  </div>
+  <label>News report</label><textarea id="breakingBody" placeholder="Describe the development and its significance..."></textarea>
+  <div class="formgrid">
+   <div><label>Duration (cycles, max 99)</label><input id="breakingDuration" type="number" min="1" max="99" step="1" value="3"></div>
+   <div><label>Immediate stock-market impact (%)</label><input id="breakingMarketImmediate" type="number" step=".1" value="0"><span class="muted small">Positive = rally; negative = sell-off</span></div>
+   <div><label>Ongoing market impact / cycle (%)</label><input id="breakingMarketOngoing" type="number" step=".1" value="0"></div>
+  </div>
+  <h4>Immediate economic effects</h4>
+  <div class="formgrid">
+   <div><label>GDP change (points)</label><input id="bnImGDP" type="number" step=".1" value="0"></div>
+   <div><label>Inflation change (points)</label><input id="bnImInflation" type="number" step=".1" value="0"></div>
+   <div><label>Industrial production (points)</label><input id="bnImIndustrial" type="number" step=".1" value="0"></div>
+   <div><label>Manufacturing demand (points)</label><input id="bnImManufacturing" type="number" step=".1" value="0"></div>
+   <div><label>Consumer spending (Π)</label><input id="bnImSpending" type="number" step="1" value="0"></div>
+   <div><label>Fuel price (Π / gallon)</label><input id="bnImFuel" type="number" step=".01" value="0"></div>
+  </div>
+  <h4>Ongoing economic effects per cycle</h4>
+  <div class="formgrid">
+   <div><label>GDP change / cycle</label><input id="bnOnGDP" type="number" step=".1" value="0"></div>
+   <div><label>Inflation change / cycle</label><input id="bnOnInflation" type="number" step=".1" value="0"></div>
+   <div><label>Industrial production / cycle</label><input id="bnOnIndustrial" type="number" step=".1" value="0"></div>
+   <div><label>Manufacturing demand / cycle</label><input id="bnOnManufacturing" type="number" step=".1" value="0"></div>
+   <div><label>Consumer spending / cycle</label><input id="bnOnSpending" type="number" step="1" value="0"></div>
+   <div><label>Fuel price / cycle</label><input id="bnOnFuel" type="number" step=".01" value="0"></div>
+  </div>
+  <div class="toolbar"><button class="btn" id="publishBreakingNews">Publish Breaking News & apply effects</button></div>
+  <p class="muted small">Market impacts apply proportionally across all listed Quamienian companies. Economic values are applied to the national dashboard. All effects are simulated and remain in the saved world data after the story concludes.</p>
+ </div>
+ <div class="card section"><h3>Active Breaking News</h3><div id="activeBreakingNews"></div></div>
+ <div class="card section"><h3>Breaking News Archive</h3><div id="breakingNewsHistory"></div></div>
+ <div class="card section"><h3>Published reports</h3><div id="newsList"></div></div>
+</section>
+
+<section id="settings" class="view">
+ <h2>Data & Settings</h2><p class="intro">Your simulator data is stored locally in this browser using local storage. Export backups regularly.</p>
+ <div class="grid two">
+  <div class="card"><h3>Export data</h3><p class="muted small">Download a JSON backup of bills, votes, economy, polling, provinces, news, event-cycle history, and stock-market data.</p><button class="btn" id="exportData">Export JSON backup</button></div>
+  <div class="card"><h3>Import data</h3><p class="muted small">Restore a previously exported Quamien simulator JSON backup.</p><input type="file" id="importFile" accept=".json,application/json"><div class="toolbar"><button class="btn secondary" id="importData">Import selected backup</button></div></div>
+  <div class="card"><h3>Reset simulator</h3><p class="muted small">Restore the original sample world data. This permanently replaces the data currently saved in this browser.</p><button class="btn danger" id="resetData">Restore sample data</button></div>
+  <div class="card"><h3>About this build</h3><p class="muted small">Quamien Simulator · Local Edition 3.8<br>Runs locally in your browser and requires no account. An internet connection is needed to refresh live global stock benchmarks; the rest of the simulator and saved market data remain available offline. This is a fictional-world tool, not a real government service.</p></div>
+ </div>
+</section>
+</main>
+<div class="footer">UNITED PROVINCES OF QUAMIEN · FICTIONAL WORLD SIMULATION · LOCAL EDITION 3.6</div>
+<script>
+const parties=[
+ {id:"CRP",name:"Civilist Reform Party",seats:115,color:"#a78bfa"},
+ {id:"CIP",name:"Conservative Initiative Party",seats:107,color:"#e8c65c"},
+ {id:"LLC",name:"Liberal Labor Coalition",seats:103,color:"#6ba9ee"},
+ {id:"NGP",name:"New Green Party",seats:85,color:"#70c78c"},
+ {id:"SPQ",name:"Socialist Party of Quamien",seats:65,color:"#ed7777"}
+];
+const sample={
+ economy:{gdp:2.502,gdpChange:-9.6,industrial:26.36,manufacturing:31.75,spending:75288,inflation:3.08,fuel:8.86},
+ polls:{CRP:51,CIP:32,LLC:12,SPQ:3,NGP:2},
+ provinces:[
+ ["Scolech","North Quamien","CRP Support"],["Strinthi","North Quamien","CRP Support"],["Geiuma","North Quamien","CRP Support"],["Toraei","North Quamien","CRP Support"],["Aven","West Quamien","CRP Support"],["Bombosia","West Quamien","CRP Support"],["Etriasu","West Quamien","Lean CRP"],["Mantea","West Quamien","Lean CRP"],["Himia","West Quamien","Lean CRP"],["Epis","South Quamien","CIP Support"],["Thalos","South Quamien","CIP Support"],["Piphilli","South Quamien","CIP Support"],["Lyxen","South Quamien","CIP Support"],["Olos","South Quamien","CIP Support"],["Losia","East Quamien","Battleground"],["Donico","East Quamien","Battleground"],["Atheas","East Quamien","Battleground"],["Cybe","East Quamien","Battleground"]
+ ],
+ bills:[{id:2026111701,title:"Public Housing, Utilities, and Cost of Living Act",description:"Roll-call tally entered from the supplied National Assembly party breakdown.",votes:{CRP:{yea:51,nay:64,abstain:0},CIP:{yea:18,nay:86,abstain:0},LLC:{yea:73,nay:27,abstain:0},NGP:{yea:63,nay:20,abstain:0},SPQ:{yea:61,nay:3,abstain:0}},publicSupport:50,caucusSupport:{CRP:50,CIP:50,LLC:50,NGP:50,SPQ:50}}],cycle:1,events:[],news:[
+ {id:1,category:"Government Statement",title:"Councillor's office monitors national cost-of-living debate",body:"The government continues to face debate over housing affordability, utilities, and the cost of living. This sample newsroom entry can be edited or deleted.",date:new Date().toLocaleDateString()}
+ ]
+};
+
+const marketCompanies=[
+ {ticker:"Q&K",name:"Quamien & Kouris Holdings",sector:"Financials",price:148.25,cap:18.4,beta:1.12,bench:"^GSPC"},
+ {ticker:"QCOMM",name:"Quamien Communications",sector:"Technology",price:92.40,cap:14.2,beta:1.35,bench:"^IXIC"},
+ {ticker:"QMN",name:"Quamien National Industries",sector:"Industrials",price:76.80,cap:11.8,beta:1.05,bench:"^FTSE"},
+ {ticker:"INVESCO",name:"Invesco Quamien Capital",sector:"Financials",price:121.60,cap:9.6,beta:1.08,bench:"^GSPC"},
+ {ticker:"UPQP",name:"United Provinces Power",sector:"Utilities",price:64.30,cap:8.7,beta:.62,bench:"^FTSE"},
+ {ticker:"REHQ",name:"Real Estate Holdings Quamien",sector:"Real Estate",price:53.20,cap:7.1,beta:.82,bench:"^GSPC"},
+ {ticker:"URBZ",name:"Urban Zones Development",sector:"Real Estate",price:38.75,cap:4.8,beta:1.02,bench:"^HSI"},
+ {ticker:"FINT",name:"FinTrust Bank Group",sector:"Financials",price:87.10,cap:6.9,beta:1.14,bench:"^GSPC"},
+ {ticker:"CAPB",name:"Capital Bank of Quamien",sector:"Financials",price:112.50,cap:8.1,beta:1.06,bench:"^STOXX50E"},
+ {ticker:"METL",name:"Metallurgy & Materials Ltd",sector:"Materials",price:45.60,cap:5.2,beta:1.18,bench:"^N225"},
+ {ticker:"AUTO",name:"Quamien Automotive Works",sector:"Automotive",price:69.40,cap:6.3,beta:1.22,bench:"^N225"},
+ {ticker:"TRDX",name:"TransQuamien Logistics",sector:"Transportation",price:58.90,cap:5.7,beta:1.10,bench:"^FTSE"},
+ {ticker:"COMR",name:"Commonwealth Retail Group",sector:"Consumer",price:41.25,cap:4.4,beta:.88,bench:"^HSI"},
+ {ticker:"FXTR",name:"Foreign Exchange & Trade Corp",sector:"Trade",price:96.70,cap:7.4,beta:1.16,bench:"^STOXX50E"},
+ {ticker:"EXCH",name:"Quamien Exchange Services",sector:"Financials",price:134.80,cap:10.2,beta:1.20,bench:"^GSPC"},
+ {ticker:"CYBR",name:"Cybernetics & Security Systems",sector:"Technology",price:177.30,cap:12.6,beta:1.48,bench:"^IXIC"},
+ {ticker:"AIIN",name:"Artificial Intelligence Industries",sector:"Technology",price:204.60,cap:16.1,beta:1.58,bench:"^IXIC"},
+ {ticker:"MEDX",name:"MedX Pharmaceuticals",sector:"Healthcare",price:83.15,cap:8.3,beta:.72,bench:"^STOXX50E"},
+ {ticker:"GRNE",name:"Green Energy Quamien",sector:"Clean Energy",price:72.80,cap:6.6,beta:1.30,bench:"^N225"},
+ {ticker:"FOOD",name:"Quamien Food & Agriculture",sector:"Consumer Staples",price:34.90,cap:3.9,beta:.58,bench:"^FTSE"}
+];
+const globalBenchmarks=[
+ {symbol:"^GSPC",name:"S&P 500",region:"United States"},
+ {symbol:"^IXIC",name:"Nasdaq Composite",region:"United States"},
+ {symbol:"^FTSE",name:"FTSE 100",region:"United Kingdom"},
+ {symbol:"^N225",name:"Nikkei 225",region:"Japan"},
+ {symbol:"^HSI",name:"Hang Seng",region:"Hong Kong"},
+ {symbol:"^STOXX50E",name:"EURO STOXX 50",region:"Eurozone"}
+];
+function createInitialMarket(){
+ const stocks={};marketCompanies.forEach(c=>stocks[c.ticker]={price:c.price,previous:c.price,change:0,changePct:0,marketCap:c.cap});
+ return {stocks,qci:1000,previousQci:1000,lastCycle:1,benchmarks:{},lastUpdated:null,feedMode:"Awaiting live data",history:[]};
+}
+let data=load();
+data.breakingNews=data.breakingNews||[];
+function load(){
+ try{
+  let d=JSON.parse(localStorage.getItem("quamienData"))||structuredClone(sample);
+  d.cycle=d.cycle||1; d.events=d.events||[]; d.bills=d.bills||[]; d.news=d.news||[]; d.breakingNews=d.breakingNews||[];
+  const baseMarket=createInitialMarket(); d.market=d.market||baseMarket; d.market.stocks={...baseMarket.stocks,...(d.market.stocks||{})}; d.market.benchmarks=d.market.benchmarks||{}; d.market.history=d.market.history||[];
+  if(d.bills.length===0)d.bills=structuredClone(sample.bills);
+  d.polls=d.polls||structuredClone(sample.polls); d.economy=d.economy||structuredClone(sample.economy);
+  // Migrate older saves to the corrected 475-seat composition.
+  d.bills.forEach(b=>{b.votes=b.votes||{};parties.forEach(p=>{b.votes[p.id]=b.votes[p.id]||{yea:0,nay:0,abstain:0};});});
+  return d;
+ }catch(e){return structuredClone(sample)}
+}
+function save(){localStorage.setItem("quamienData",JSON.stringify(data));renderAll()}
+
+const demographicSeed={
+ ethnicity:[["Greko-European",300,2,0,0,0,0],["Slovak",120,0,2,0,0,0],["Native",240,0,0,1,0,0],["Arab",120,0,1,0,0,0],["African",180,0,0,0,2,0],["Hispanic",120,0,0,1,0,0],["Asian Pacific",120,0,0,0,0,2]],
+ age:[["18–24",150,0,0,2,1,1],["25–34",240,0,0,1,1,1],["35–44",240,1,0,0,0,0],["45–54",210,1,1,0,0,0],["55–64",180,1,1,0,0,0],["65+",180,2,1,0,0,0]],
+ gender:[["Women",590,0,0,1,1,1],["Men",570,1,1,0,0,0],["Non-binary / another identity",40,0,0,1,1,1]],
+ education:[["Secondary or less",300,1,1,0,0,0],["Some college / vocational",330,0,0,1,1,0],["Bachelor's degree",360,1,0,0,0,1],["Postgraduate degree",210,1,0,0,0,1]],
+ region:[["North Quamien",300,2,0,0,0,0],["West Quamien",300,2,0,0,0,0],["South Quamien",360,0,2,0,0,0],["East Quamien",240,0,0,1,1,1]]
+};
+function normalizeArray(obj){
+ let total=parties.reduce((a,p)=>a+Math.max(0,Number(obj[p.id]||0)),0);
+ if(total<=0){parties.forEach(p=>obj[p.id]=20);return obj}
+ parties.forEach(p=>obj[p.id]=Math.round(Math.max(0,Number(obj[p.id]||0))/total*1000)/10);
+ let diff=Math.round((100-parties.reduce((a,p)=>a+obj[p.id],0))*10)/10;
+ obj.CRP=Math.round((obj.CRP+diff)*10)/10;return obj;
+}
+function ensureOpinion(){
+ data.events=data.events||[];data.cycle=data.cycle||1;data.bills=data.bills||[];
+ if(!data.opinion)data.opinion={sampleSize:1200,wave:data.cycle||1,dimensions:{}};
+ data.opinion.sampleSize=data.opinion.sampleSize||1200;
+ data.opinion.dimensions=data.opinion.dimensions||{};
+ Object.keys(demographicSeed).forEach(dim=>{
+  if(!data.opinion.dimensions[dim]){
+   data.opinion.dimensions[dim]=demographicSeed[dim].map((r,i)=>{
+    let base={};parties.forEach(p=>base[p.id]=Number(data.polls[p.id]||0));
+    // Distinct but modest fictional subgroup differences; normalized to 100.
+    let bias=[r[2]||0,r[3]||0,r[4]||0,r[5]||0,r[6]||0];
+    parties.forEach((p,j)=>base[p.id]+=bias[j]*2.2);
+    normalizeArray(base);
+    return {name:r[0],n:r[1],parties:base,billSupport:50+(i%3-1)*2};
+   });
+  }
+ });
+ // Existing bills gain an opinion-tracking field.
+ (data.bills||[]).forEach(b=>{
+  if(typeof b.publicSupport!=="number")b.publicSupport=50;
+  b.caucusSupport=b.caucusSupport||{};
+  parties.forEach(p=>{if(typeof b.caucusSupport[p.id]!=="number")b.caucusSupport[p.id]=50;});
+ });
+}
+function cloneState(value){return JSON.parse(JSON.stringify(value));}
+function captureEventRollback(){
+ return {economy:cloneState(data.economy),polls:cloneState(data.polls),opinion:cloneState(data.opinion||{}),bills:cloneState(data.bills)};
+}
+function restoreEventRollback(snapshot){
+ if(!snapshot) return false;
+ data.economy=cloneState(snapshot.economy);
+ data.polls=cloneState(snapshot.polls);
+ data.opinion=cloneState(snapshot.opinion);
+ data.bills=cloneState(snapshot.bills);
+ return true;
+}
+function deleteEventAndReverse(id){
+ const ev=data.events.find(x=>x.id===Number(id));
+ if(!ev)return;
+ if(!ev.rollbackSnapshot){alert('This event was created before reversible event deletion was added. Its original changes cannot be safely reconstructed.');return;}
+ if(data.events[data.events.length-1]?.id!==ev.id){alert('To protect later events, delete events in reverse publication order. Delete the newer event(s) first.');return;}
+ if(data.cycle!==ev.started){alert('This event has already passed through one or more national cycles. Reversal is not yet safe because other active events may also have affected the same indicators.');return;}
+ if(!confirm('Permanently delete “'+ev.title+'” and restore the economy, party polling, demographic polling, and bill-support values to what they were immediately before this event was published? This will also remove its original newsroom entry.'))return;
+ restoreEventRollback(ev.rollbackSnapshot);
+ data.events=data.events.filter(x=>x.id!==ev.id);
+ data.news=data.news.filter(n=>n.id!==ev.newsId);
+ save();
+ alert('Event deleted. Its recorded immediate effects have been reversed.');
+}
+function applyOpinionShift(changes){
+ ensureOpinion();
+ Object.values(data.opinion.dimensions).forEach(groups=>groups.forEach(g=>{
+  let next={};parties.forEach(p=>next[p.id]=Number(g.parties[p.id]||0)+(changes[p.id]||0));
+  g.parties=normalizeArray(next);
+ }));
+}
+function weightedGroupSupport(dim,billId){
+ let groups=data.opinion.dimensions[dim]||[];
+ let b=data.bills.find(x=>x.id===Number(billId));
+ return groups.map((g,i)=>{
+  if(b){
+   g.billSupportByBill=g.billSupportByBill||{};
+   if(typeof g.billSupportByBill[b.id]!=="number")g.billSupportByBill[b.id]=clamp(Number(b.publicSupport??50)+(i%4-1.5)*2);
+  }
+  return {name:g.name,n:g.n,parties:g.parties,billSupport:b?g.billSupportByBill[b.id]:g.billSupport};
+ });
+}
+
+ensureOpinion();
+function money(v){return "Π"+Number(v).toLocaleString("en-US",{maximumFractionDigits:2})}
+function pct(v){return Number(v).toFixed(2).replace(/\.00$/,"")+"%"}
+function partyTag(id){return `<span class="party ${id}">${id}</span>`}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+document.getElementById("today").textContent=new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById(b.dataset.view).classList.add("active")}));
+function metric(label,value,sub=""){return `<div class="card"><div class="muted small">${label}</div><div class="metric">${value}</div><div class="muted small">${sub}</div></div>`}
+function marketFmt(v){return "Π"+Number(v||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function renderMarket(){
+ const m=data.market|| (data.market=createInitialMarket());
+ const rows=globalBenchmarks.map(b=>{const q=m.benchmarks[b.symbol]||{};const ch=Number(q.changePct||0);return `<div class="newsitem"><div style="display:flex;justify-content:space-between;gap:10px"><div><strong>${b.name}</strong><div class="muted small">${b.region}${q.price!=null?" · "+Number(q.price).toLocaleString("en-US",{maximumFractionDigits:2}):""}</div></div><strong class="${ch>=0?"positive":"negative"}">${q.changePct==null?"—":(ch>=0?"▲ +":"▼ ")+ch.toFixed(2)+"%"}</strong></div></div>`}).join("");
+ document.getElementById("globalMarketRows").innerHTML=rows;
+ document.getElementById("marketFeedStatus").textContent=(m.feedMode||"No market snapshot")+(m.lastUpdated?" · Updated "+new Date(m.lastUpdated).toLocaleString():"");
+ document.getElementById("qciValue").textContent=Number(m.qci||1000).toFixed(2);
+ const qciCh=Number(m.previousQci)?(Number(m.qci)-Number(m.previousQci))/Number(m.previousQci)*100:0;
+ document.getElementById("qciChange").innerHTML=`<span class="${qciCh>=0?"positive":"negative"}">${qciCh>=0?"▲ +":"▼ "}${qciCh.toFixed(2)}%</span> · Cycle ${m.lastCycle||data.cycle}`;
+ const stockRows=marketCompanies.map(c=>{const st=m.stocks[c.ticker]||{price:c.price,changePct:0,marketCap:c.cap};const ch=Number(st.changePct||0);return `<tr><td><strong>${c.ticker}</strong><div class="muted small">${c.name}</div></td><td>${c.sector}</td><td>${marketFmt(st.price)}</td><td class="${ch>=0?"positive":"negative"}">${ch>=0?"+":""}${ch.toFixed(2)}%</td><td>Π${Number(st.marketCap||c.cap).toFixed(1)}B</td></tr>`}).join("");
+ document.getElementById("tickerRows").innerHTML=stockRows;
+ const chartSelect=document.getElementById("stockChartSelect"),selectedTicker=chartSelect.value;
+ if(chartSelect.options.length!==marketCompanies.length){chartSelect.innerHTML=marketCompanies.map(c=>`<option value="${c.ticker}">${c.ticker} — ${c.name}</option>`).join("");}
+ if(marketCompanies.some(c=>c.ticker===selectedTicker))chartSelect.value=selectedTicker;
+ renderMarketCharts();
+ const gainers=marketCompanies.map(c=>({c,s:m.stocks[c.ticker]||{changePct:0}})).sort((a,b)=>b.s.changePct-a.s.changePct);
+ const avg=marketCompanies.reduce((a,c)=>a+Number((m.stocks[c.ticker]||{}).changePct||0),0)/marketCompanies.length;
+ document.getElementById("marketMetrics").innerHTML=metric("Quamien Composite",Number(m.qci||1000).toFixed(2),`Cycle ${m.lastCycle||data.cycle}`)+metric("Listed securities",marketCompanies.length,"Fictional domestic companies")+metric("Average share movement",(avg>=0?"+":"")+avg.toFixed(2)+"%","Latest cycle")+metric("Top performer",gainers[0].c.ticker,(Number(gainers[0].s.changePct||0)>=0?"+":"")+Number(gainers[0].s.changePct||0).toFixed(2)+"%");
+}
+function marketChartSvg(values,label,formatValue){
+ const clean=values.filter(v=>Number.isFinite(Number(v.value)));
+ if(clean.length<2)return '<div class="chart-empty">Advance simulation cycles to build a historical chart.</div>';
+ const W=620,H=220,L=48,R=14,T=14,B=34,innerW=W-L-R,innerH=H-T-B;
+ const nums=clean.map(v=>Number(v.value)),lo=Math.min(...nums),hi=Math.max(...nums),pad=(hi-lo||Math.max(Math.abs(hi)*.02,1))*.16,min=lo-pad,max=hi+pad;
+ const x=i=>L+(i/(clean.length-1))*innerW,y=v=>T+(max-v)/(max-min)*innerH;
+ const points=clean.map((v,i)=>`${x(i).toFixed(1)},${y(Number(v.value)).toFixed(1)}`).join(' ');
+ const area=`${L},${H-B} ${points} ${W-R},${H-B}`;
+ const grid=[0,1,2,3].map(i=>{const yy=T+i*innerH/3,val=max-i*(max-min)/3;return `<line class="chart-grid" x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}"/><text class="chart-label" x="${L-7}" y="${yy+3}" text-anchor="end">${formatValue(val)}</text>`}).join('');
+ const first=clean[0].cycle??'Start',last=clean[-1]?.cycle??clean[clean.length-1].cycle;
+ return `<svg viewBox="0 0 ${W} ${H}" aria-label="${label}" preserveAspectRatio="none"><title>${label}</title>${grid}<polygon class="chart-area" points="${area}"/><polyline class="chart-line" points="${points}"/><text class="chart-label" x="${L}" y="${H-9}">Cycle ${first}</text><text class="chart-label" x="${W-R}" y="${H-9}" text-anchor="end">Cycle ${last}</text></svg>`;
+}
+function renderMarketCharts(){
+ const m=data.market||createInitialMarket();
+ const history=(m.history||[]).slice(-40);
+ const qci=document.getElementById('qciChart');
+ if(qci)qci.innerHTML=marketChartSvg(history.map(h=>({cycle:h.cycle,value:h.qci})), 'Quamien Composite Index',v=>Number(v).toFixed(0));
+ const ticker=document.getElementById('stockChartSelect')?.value||marketCompanies[0].ticker;
+ const company=marketCompanies.find(c=>c.ticker===ticker)||marketCompanies[0];
+ const series=history.map(h=>({cycle:h.cycle,value:h.stocks?.[company.ticker]})).filter(h=>Number.isFinite(Number(h.value)));
+ const current=m.stocks?.[company.ticker]?.price;
+ if(!series.length&&Number.isFinite(Number(current)))series.push({cycle:m.lastCycle||data.cycle,value:Number(current)});
+ const host=document.getElementById('stockPriceChart');
+ if(host)host.innerHTML=series.length>1?marketChartSvg(series,company.name+' share price',v=>'Π'+Number(v).toFixed(0)):`<div class="chart-empty">${series.length===1?'One recorded price point. Advance another cycle to see the trend.':'No price history available yet.'}<br><strong>${marketFmt(current)}</strong></div>`;
+}
+document.getElementById('stockChartSelect').addEventListener('change',renderMarketCharts);
+async function fetchGlobalBenchmarks(){
+ const results={};
+ await Promise.all(globalBenchmarks.map(async b=>{
+  try{
+   const url="https://query1.finance.yahoo.com/v8/finance/chart/"+encodeURIComponent(b.symbol)+"?range=5d&interval=1d";
+   const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw Error("HTTP "+response.status);
+   const json=await response.json(),r=json.chart?.result?.[0];if(!r)throw Error("No quote data");
+   const q=r.indicators?.quote?.[0],closes=(q?.close||[]).filter(x=>Number.isFinite(x));
+   const price=Number(r.meta?.regularMarketPrice??closes.at(-1));
+   const prev=Number(r.meta?.chartPreviousClose??r.meta?.previousClose??closes.at(-2));
+   if(!Number.isFinite(price)||!Number.isFinite(prev)||prev===0)throw Error("Incomplete quote");
+   results[b.symbol]={price,previousClose:prev,changePct:(price-prev)/prev*100,asOf:new Date().toISOString()};
+  }catch(e){/* A missing quote is retained from the last successful snapshot. */}
+ }));
+ return results;
+}
+async function refreshGlobalMarkets(options={}){
+ const fetched=await fetchGlobalBenchmarks();
+ const count=Object.keys(fetched).length;
+ if(count){data.market.benchmarks={...data.market.benchmarks,...fetched};data.market.lastUpdated=new Date().toISOString();data.market.feedMode=count===globalBenchmarks.length?"Live global market feed":"Partial live global market feed";save();}
+ else if(!Object.keys(data.market.benchmarks).length){data.market.feedMode="Live feed unavailable · modelled global-market proxy will be used";save();}
+ if(!options.silent)alert(count?`Updated ${count} of ${globalBenchmarks.length} global market benchmarks.`:"Live market data could not be reached. The exchange will use its saved market snapshot and domestic simulation factors.");
+ return count;
+}
+function advanceStockExchange(){
+ const m=data.market||(data.market=createInitialMarket());
+ const local={gdp:Number(data.economy.gdpChange||0),inflation:Number(data.economy.inflation||0),industrial:Number(data.economy.industrial||0),manufacturing:Number(data.economy.manufacturing||0),fuel:Number(data.economy.fuel||0)};
+ const benchReturns={};globalBenchmarks.forEach(b=>benchReturns[b.symbol]=Number(m.benchmarks[b.symbol]?.changePct||0));
+ const cycle=m.lastCycle||data.cycle;
+ const nextStocks={};let weighted=0,totalWeight=0;
+ marketCompanies.forEach((c,i)=>{
+  const old=m.stocks[c.ticker]||{price:c.price,marketCap:c.cap};
+  const global=benchReturns[c.bench]||0;
+  let localPressure=(local.gdp*.035)+(local.industrial-30)*.012+(local.manufacturing-30)*.008-(local.inflation-3)*.045-(local.fuel-8)*.035;
+  let sector=0;
+  if(c.sector==="Technology")sector+=(local.industrial-30)*.012;
+  if(c.sector==="Utilities")sector-=Math.max(0,local.fuel-8)*.045;
+  if(c.sector==="Clean Energy")sector+=(local.industrial-30)*.008+Math.max(0,local.fuel-8)*.025;
+  if(c.sector==="Financials")sector-=(local.inflation-3)*.025;
+  if(c.sector==="Consumer"||c.sector==="Consumer Staples")sector-=Math.max(0,local.inflation-3)*.035;
+  const cycleWave=Math.sin((cycle+i*1.7)*1.31)*.18;
+  const pct=Math.max(-12,Math.min(12,global*c.beta*.32+localPressure+sector+cycleWave));
+  const price=Math.max(.5,Number(old.price||c.price)*(1+pct/100));
+  nextStocks[c.ticker]={price,previous:Number(old.price||c.price),change:price-Number(old.price||c.price),changePct:pct,marketCap:Number(old.marketCap||c.cap)*(price/Number(old.price||c.price))};
+  const weight=c.cap;weighted+=pct*weight;totalWeight+=weight;
+ });
+ const marketReturn=totalWeight?weighted/totalWeight:0;
+ m.previousQci=Number(m.qci||1000);m.qci=Math.max(100,Number(m.qci||1000)*(1+marketReturn/100));m.stocks=nextStocks;m.lastCycle=data.cycle;
+ m.history.push({cycle:data.cycle,qci:m.qci,changePct:marketReturn,stocks:Object.fromEntries(Object.entries(m.stocks).map(([ticker,stock])=>[ticker,Number(stock.price)])),asOf:m.lastUpdated||new Date().toISOString()});if(m.history.length>100)m.history=m.history.slice(-100);
+}
+function renderOverview(){
+ const e=data.economy;
+ document.getElementById("overviewMetrics").innerHTML=metric("Gross domestic product",money(e.gdp)+"B",`GDP change: ${pct(e.gdpChange)}`)+metric("Inflation",pct(e.inflation),"Annual rate")+metric("Industrial production",pct(e.industrial),"Industrial activity")+metric("Fuel price",money(e.fuel)+"/gal","Average national price");
+ document.getElementById("seatBars").innerHTML=parties.map(p=>`<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;margin-bottom:5px">${partyTag(p.id)} <span>${p.seats} seats · ${(p.seats/475*100).toFixed(1)}%</span></div><div class="bar"><span style="width:${p.seats/475*100}%;background:${p.color}"></span></div></div>`).join("");
+ document.getElementById("latestNews").innerHTML=data.news.slice(-3).reverse().map(n=>`<div class="newsitem"><strong>${esc(n.title)}</strong><span class="muted small">${esc(n.category)} · ${esc(n.date)}</span></div>`).join("")||'<div class="empty">No news items yet.</div>';
+}
+function currentBill(){return data.bills.find(b=>b.id===Number(document.getElementById("billSelect").value))||data.bills[0]}
+function renderAssembly(){
+ const sel=document.getElementById("billSelect"),old=sel.value;
+ sel.innerHTML=data.bills.map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join("");
+ if(data.bills.some(b=>String(b.id)===old))sel.value=old;
+ const bill=currentBill();
+ document.getElementById("voteRows").innerHTML=parties.map(p=>{let v=bill?.votes?.[p.id]||{yea:0,nay:0,abstain:0};let not=p.seats-v.yea-v.nay-v.abstain;return `<tr><td>${partyTag(p.id)}<div class="muted small">${p.name}</div></td><td>${p.seats}</td><td><input type="number" min="0" max="${p.seats}" data-party="${p.id}" data-vote="yea" value="${v.yea}"></td><td><input type="number" min="0" max="${p.seats}" data-party="${p.id}" data-vote="nay" value="${v.nay}"></td><td><input type="number" min="0" max="${p.seats}" data-party="${p.id}" data-vote="abstain" value="${v.abstain}"></td><td>${not}</td></tr>`}).join("");
+ document.getElementById("partySeats").innerHTML=parties.map(p=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)">${partyTag(p.id)} <span>${p.seats} seats</span></div>`).join("");
+ renderVoteSliders();refreshAssemblySummary();
+}
+function renderVoteSliders(){
+ const bill=currentBill(),host=document.getElementById("voteSliders");
+ if(!bill){host.innerHTML='<div class="empty">Create or select a bill to adjust party votes.</div>';return;}
+ host.innerHTML=parties.map(p=>{
+  const v=bill.votes?.[p.id]||{yea:0,nay:0,abstain:0};
+  const decided=Number(v.yea||0)+Number(v.nay||0);
+  const active=decided>0;
+  const pct=active?(Number(v.yea||0)/decided*100):0;
+  return `<div class="vote-slider-row vote-slider" data-slider-party="${p.id}">
+   <div class="vote-slider-head"><div>${partyTag(p.id)} <span class="muted small">${p.seats} seats</span></div><strong><span data-slider-yea>${v.yea||0}</span> Yea · <span data-slider-nay>${v.nay||0}</span> Nay</strong></div>
+   <input type="range" min="0" max="${decided}" step="1" value="${v.yea||0}" data-vote-slider="${p.id}" ${active?"":"disabled"} aria-label="${p.id} Yea vote share">
+   <div class="vote-slider-stats"><span>Yea: <strong data-slider-yea-stat>${v.yea||0}</strong></span><span>Nay: <strong data-slider-nay-stat>${v.nay||0}</strong></span><span>Abstain: <strong>${v.abstain||0}</strong></span><span>Not voting: <strong>${p.seats-decided-Number(v.abstain||0)}</strong></span><span>${active?pct.toFixed(1)+"% Yea of decided votes":"No Yea/Nay votes entered yet"}</span></div>
+  </div>`;
+ }).join("");
+}
+function refreshAssemblySummary(){
+ const bill=currentBill(),totals=totalsFor(bill),notVoting=parties.reduce((sum,p)=>{const v=bill?.votes?.[p.id]||{};return sum+p.seats-Number(v.yea||0)-Number(v.nay||0)-Number(v.abstain||0)},0);
+ document.getElementById("voteMetrics").innerHTML=metric("Yea votes",totals.yea)+metric("Nay votes",totals.nay)+metric("Abstentions",totals.abstain)+metric("Not voting",notVoting)+metric("Outcome",totals.yea>=238?'<span class="positive">PASSED</span>':"PENDING",`238 yea votes required`);
+ document.getElementById("billResult").innerHTML=bill?`<strong>${esc(bill.title)}</strong><p class="muted small">${esc(bill.description||"No description provided.")}</p><div class="metric">${totals.yea} / 475</div><div class="${totals.yea>=238?'positive':'muted'}">${totals.yea>=238?'PASSED':'Not yet passed'}</div><div class="section"><div class="muted small">Simulated public support</div><strong>${Number(bill.publicSupport??50).toFixed(1)}%</strong><div class="muted small">Estimated caucus support, adjusted by public-opinion shifts:</div><div style="overflow:auto"><table><tbody>${parties.map(p=>`<tr><td>${partyTag(p.id)}</td><td>${Number(bill.caucusSupport?.[p.id]??50).toFixed(1)}% estimated support</td></tr>`).join("")}</tbody></table></div><div class="muted small">These are simulated political-pressure indicators, not actual member votes. Roll-call votes remain manually recorded.</div></div>`:'<div class="empty">Create or select a bill to view its tally.</div>';
+}
+function totalsFor(b){let t={yea:0,nay:0,abstain:0};if(b)parties.forEach(p=>{let v=b.votes?.[p.id]||{};Object.keys(t).forEach(k=>t[k]+=Number(v[k]||0))});return t}
+document.getElementById("voteSliders").addEventListener("input",e=>{
+ const slider=e.target.closest("input[data-vote-slider]");if(!slider)return;
+ const bill=currentBill(),p=parties.find(x=>x.id===slider.dataset.voteSlider);if(!bill||!p)return;
+ const v=bill.votes[p.id]||(bill.votes[p.id]={yea:0,nay:0,abstain:0});
+ const decided=Number(v.yea||0)+Number(v.nay||0),yea=Math.max(0,Math.min(decided,Number(slider.value)||0));
+ v.yea=yea;v.nay=decided-yea;
+ const row=document.querySelector(`[data-slider-party="${p.id}"]`);
+ row.querySelector("[data-slider-yea]").textContent=yea;row.querySelector("[data-slider-nay]").textContent=v.nay;
+ row.querySelector("[data-slider-yea-stat]").textContent=yea;row.querySelector("[data-slider-nay-stat]").textContent=v.nay;
+ const pct=decided?yea/decided*100:0;row.querySelector(".vote-slider-stats span:last-child").textContent=pct.toFixed(1)+"% Yea of decided votes";
+ document.querySelector(`#voteRows input[data-party="${p.id}"][data-vote="yea"]`).value=yea;
+ document.querySelector(`#voteRows input[data-party="${p.id}"][data-vote="nay"]`).value=v.nay;
+ refreshAssemblySummary();
+});
+document.getElementById("voteSliders").addEventListener("change",e=>{if(e.target.matches("input[data-vote-slider]"))save()});
+document.getElementById("addBill").onclick=()=>{let title=document.getElementById("billTitle").value.trim();if(!title)return alert("Enter a bill title.");let b={id:Date.now(),title,description:document.getElementById("billDesc").value,votes:{},publicSupport:50,caucusSupport:{}};parties.forEach(p=>{b.votes[p.id]={yea:0,nay:0,abstain:0};b.caucusSupport[p.id]=50;});data.bills.push(b);document.getElementById("billTitle").value="";document.getElementById("billDesc").value="";save();document.getElementById("billSelect").value=b.id;renderAssembly()};
+document.getElementById("billSelect").onchange=renderAssembly;
+document.getElementById("saveVotes").onclick=()=>{let b=currentBill();if(!b)return alert("Create a bill first.");let vals={};for(let p of parties){vals[p.id]={yea:0,nay:0,abstain:0}}document.querySelectorAll("#voteRows input").forEach(i=>vals[i.dataset.party][i.dataset.vote]=Math.max(0,Number(i.value)||0));for(let p of parties){let sum=vals[p.id].yea+vals[p.id].nay+vals[p.id].abstain;if(sum>p.seats)return alert(`${p.id} has ${sum} votes entered but only ${p.seats} seats.`)}b.votes=vals;save();alert("Roll-call tally saved.")};
+document.getElementById("clearVotes").onclick=()=>{let b=currentBill();if(!b)return;parties.forEach(p=>b.votes[p.id]={yea:0,nay:0,abstain:0});save()};
+function renderEconomy(){let e=data.economy;document.getElementById("economyMetrics").innerHTML=metric("GDP",money(e.gdp)+"B",`Change ${pct(e.gdpChange)}`)+metric("Industrial production",pct(e.industrial))+metric("Manufacturing demand",pct(e.manufacturing))+metric("Consumer spending",money(e.spending))+metric("Inflation",pct(e.inflation))+metric("Fuel price",money(e.fuel)+"/gal");Object.keys(e).forEach(k=>{let el=document.getElementById(k);if(el)el.value=e[k]})}
+document.getElementById("saveEconomy").onclick=()=>{Object.keys(data.economy).forEach(k=>data.economy[k]=Number(document.getElementById(k).value)||0);save();alert("Economic indicators saved.")};
+function renderElections(){document.getElementById("pollBars").innerHTML=parties.map(p=>`<div style="margin:12px 0"><div style="display:flex;justify-content:space-between">${partyTag(p.id)} <strong>${data.polls[p.id]}%</strong></div><div class="bar"><span style="width:${Math.max(0,Math.min(100,data.polls[p.id]))}%;background:${p.color}"></span></div></div>`).join("");document.getElementById("pollInputs").innerHTML=parties.map(p=>`<div><label>${p.name} (%)</label><input type="number" min="0" max="100" id="poll_${p.id}" value="${data.polls[p.id]}"></div>`).join("");document.getElementById("provinceRows").innerHTML=data.provinces.map((p,i)=>`<tr><td>${esc(p[0])}</td><td>${esc(p[1])}</td><td><select data-prov="${i}">${["CRP Support","Lean CRP","CIP Support","Battleground","LLC Support","SPQ Support","NGP Support","Unclassified"].map(x=>`<option ${p[2]===x?"selected":""}>${x}</option>`).join("")}</select></td></tr>`).join("")}
+document.getElementById("savePolls").onclick=()=>{parties.forEach(p=>data.polls[p.id]=Math.max(0,Math.min(100,Number(document.getElementById("poll_"+p.id).value)||0)));save();alert("Polling averages saved.")};
+document.getElementById("saveProvinces").onclick=()=>{document.querySelectorAll("[data-prov]").forEach(s=>data.provinces[Number(s.dataset.prov)][2]=s.value);save();alert("Provincial classifications saved.")};
+function applyBreakingMarketImpact(pct){
+ const m=data.market||(data.market=createInitialMarket());
+ const shock=Math.max(-50,Math.min(50,Number(pct)||0));
+ if(!shock)return;
+ Object.keys(m.stocks||{}).forEach(ticker=>{
+  const st=m.stocks[ticker];const old=Number(st.price||0);
+  const next=Math.max(.01,old*(1+shock/100));
+  st.previous=old;st.price=next;st.change=next-old;st.changePct=shock;
+  st.marketCap=Number(st.marketCap||0)*(next/Math.max(.01,old));
+ });
+ const oldQci=Number(m.qci||1000);m.previousQci=oldQci;m.qci=Math.max(100,oldQci*(1+shock/100));
+ const snapshot={cycle:data.cycle,qci:m.qci,changePct:shock,stocks:Object.fromEntries(Object.entries(m.stocks).map(([t,st])=>[t,Number(st.price)])),asOf:new Date().toISOString(),breakingNews:true};
+ m.history=m.history||[];m.history.push(snapshot);if(m.history.length>100)m.history=m.history.slice(-100);
+}
+function renderBreakingNews(){
+ const items=data.breakingNews||[];
+ const active=items.filter(n=>n.remaining>0);
+ document.getElementById("activeBreakingNews").innerHTML=active.map(n=>`<div class="newsitem"><strong>${esc(n.title)}</strong><span class="muted small">${esc(n.category)} · ${n.remaining} cycle(s) remaining · Published cycle ${n.started}</span><div>${esc(n.body)}</div><div class="muted small">Ongoing market impact: ${Number(n.marketOngoing||0)>=0?"+":""}${Number(n.marketOngoing||0).toFixed(2)}% / cycle</div><button class="btn secondary" data-resolve-breaking="${n.id}">Resolve Breaking News</button></div>`).join("")||'<div class="empty">No active Breaking News.</div>';
+ document.querySelectorAll("[data-resolve-breaking]").forEach(b=>b.onclick=()=>{
+  const item=items.find(n=>n.id===Number(b.dataset.resolveBreaking));
+  if(item){item.remaining=0;item.resolvedAtCycle=data.cycle;save();}
+ });
+ document.getElementById("breakingNewsHistory").innerHTML=items.slice().reverse().map(n=>`<div class="newsitem"><strong>${esc(n.title)}</strong><span class="muted small">${esc(n.category)} · Started cycle ${n.started} · ${n.remaining>0?n.remaining+" cycles remaining":"Concluded"}</span><div>${esc(n.body)}</div><div class="muted small">Immediate market impact: ${Number(n.marketImmediate||0)>=0?"+":""}${Number(n.marketImmediate||0).toFixed(2)}% · Ongoing market impact: ${Number(n.marketOngoing||0)>=0?"+":""}${Number(n.marketOngoing||0).toFixed(2)}% / cycle</div></div>`).join("")||'<div class="empty">No Breaking News published yet.</div>';
+}
+document.getElementById("publishBreakingNews").onclick=()=>{
+ const title=document.getElementById("breakingTitle").value.trim(),body=document.getElementById("breakingBody").value.trim();
+ if(!title||!body)return alert("Enter a Breaking News headline and report.");
+ const duration=Math.max(1,Math.min(99,Math.floor(Number(document.getElementById("breakingDuration").value)||1)));
+ const immediate={gdp:num("bnImGDP"),inflation:num("bnImInflation"),industrial:num("bnImIndustrial"),manufacturing:num("bnImManufacturing"),spending:num("bnImSpending"),fuel:num("bnImFuel")};
+ const ongoing={gdp:num("bnOnGDP"),inflation:num("bnOnInflation"),industrial:num("bnOnIndustrial"),manufacturing:num("bnOnManufacturing"),spending:num("bnOnSpending"),fuel:num("bnOnFuel")};
+ const marketImmediate=num("breakingMarketImmediate"),marketOngoing=num("breakingMarketOngoing");
+ applyEconomy(immediate);applyBreakingMarketImpact(marketImmediate);
+ const item={id:Date.now(),title,body,category:document.getElementById("breakingCategory").value,started:data.cycle,remaining:duration,immediate,ongoing,marketImmediate,marketOngoing};
+ data.breakingNews.push(item);
+ data.news.push({id:item.id+1,title,body,category:"BREAKING · "+item.category,date:new Date().toLocaleDateString(),breakingNewsId:item.id});
+ document.getElementById("breakingTitle").value="";document.getElementById("breakingBody").value="";
+ save();alert("Breaking News published. Immediate economic and stock-market effects have been applied.");
+};
+function renderNews(){renderBreakingNews();document.getElementById("newsList").innerHTML=data.news.slice().reverse().map(n=>`<div class="newsitem"><div style="display:flex;justify-content:space-between;gap:12px"><div><span class="pill">${esc(n.category)}</span> <span class="muted small">${esc(n.date)}</span><strong style="margin-top:7px">${esc(n.title)}</strong><div>${esc(n.body)}</div></div><button class="btn danger" data-del="${n.id}">Delete</button></div></div>`).join("")||'<div class="empty">No published reports.</div>';document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{data.news=data.news.filter(n=>n.id!==Number(b.dataset.del));save()})}
+document.getElementById("publishNews").onclick=()=>{let title=document.getElementById("newsTitle").value.trim(),body=document.getElementById("newsBody").value.trim();if(!title||!body)return alert("Enter both a headline and story.");data.news.push({id:Date.now(),title,body,category:document.getElementById("newsCategory").value,date:new Date().toLocaleDateString()});document.getElementById("newsTitle").value="";document.getElementById("newsBody").value="";save();alert("News item published to the local archive.")};
+document.getElementById("exportData").onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="quamien-simulator-backup.json";a.click();URL.revokeObjectURL(a.href)};
+document.getElementById("importData").onclick=()=>{let f=document.getElementById("importFile").files[0];if(!f)return alert("Choose a JSON backup first.");let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!d.economy||!d.bills||!d.polls||!d.news)throw Error();data=d;ensureOpinion();save();alert("Backup imported.")}catch(e){alert("That file does not look like a Quamien Simulator backup.")}};r.readAsText(f)};
+document.getElementById("resetData").onclick=()=>{if(confirm("Replace all current simulator data with the original sample data?")){data=structuredClone(sample);save();alert("Sample data restored.")}};
+
+
+function ensureHeadlinePolls(){
+ data.news=data.news||[];
+ data.headlinePolls=data.headlinePolls||{};
+ data.news.forEach(n=>{
+  if(!data.headlinePolls[n.id])data.headlinePolls[n.id]={favorable:33.3,unfavorable:33.3,neutral:33.4,sampleSize:1200};
+ });
+}
+function renderHeadlinePoll(){
+ ensureHeadlinePolls();
+ const sel=document.getElementById("headlinePollSelect");
+ const previous=sel.value;
+ sel.innerHTML=data.news.map(n=>`<option value="${n.id}">${esc(n.title)}</option>`).join("");
+ if(data.news.some(n=>String(n.id)===previous))sel.value=previous;
+ const item=data.news.find(n=>n.id===Number(sel.value));
+ const display=document.getElementById("headlinePollDisplay");
+ if(!item){
+  display.innerHTML='<div class="empty">No news headlines are available. Publish a report in the Newsroom first.</div>';
+  ["headlineFavorable","headlineUnfavorable","headlineNeutral","headlineSampleSize"].forEach(id=>document.getElementById(id).value="");
+  updateHeadlineSliderDisplay();
+  return;
+ }
+ const poll=data.headlinePolls[item.id];
+ document.getElementById("headlineFavorable").value=poll.favorable;
+ document.getElementById("headlineNeutral").value=poll.neutral;
+ document.getElementById("headlineUnfavorable").value=poll.unfavorable;
+ document.getElementById("headlineSampleSize").value=poll.sampleSize;
+ updateHeadlineSliderDisplay();
+ display.innerHTML=`<strong>${esc(item.title)}</strong><div class="muted small">${esc(item.category||"News")} · ${esc(item.date||"")}</div>
+ <div class="section">${[
+  ["Favorable",poll.favorable,"#55c59a"],["Unfavorable",poll.unfavorable,"#ef7979"],["Neutral / unsure",poll.neutral,"#9aabc0"]
+ ].map(([label,value,color])=>`<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>${label}</span><strong>${Number(value).toFixed(1)}%</strong></div><div class="bar"><span style="width:${clamp(value)}%;background:${color}"></span></div></div>`).join("")}</div>
+ <div class="muted small">Survey sample: ${Number(poll.sampleSize).toLocaleString()} respondents</div>`;
+}
+function updateHeadlineSliderDisplay(){
+ const favorable=Number(document.getElementById("headlineFavorable").value)||0;
+ const neutral=Number(document.getElementById("headlineNeutral").value)||0;
+ const safeNeutral=Math.min(neutral,100-favorable);
+ const unfavorable=Math.max(0,Math.round((100-favorable-safeNeutral)*10)/10);
+ document.getElementById("headlineNeutral").max=(100-favorable).toFixed(1);
+ document.getElementById("headlineNeutral").value=safeNeutral;
+ document.getElementById("headlineUnfavorable").value=unfavorable;
+ document.getElementById("headlineFavorableValue").textContent=favorable.toFixed(1)+"%";
+ document.getElementById("headlineNeutralValue").textContent=safeNeutral.toFixed(1)+"%";
+ document.getElementById("headlineUnfavorableValue").textContent=unfavorable.toFixed(1)+"%";
+ document.getElementById("headlineUnfavorableBar").style.width=unfavorable+"%";
+}
+["headlineFavorable","headlineNeutral"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{
+ updateHeadlineSliderDisplay();
+ const f=Number(document.getElementById("headlineFavorable").value)||0;
+ const n=Number(document.getElementById("headlineNeutral").value)||0;
+ const u=Math.max(0,100-f-n);
+ const display=document.getElementById("headlinePollDisplay");
+ const item=data.news.find(x=>x.id===Number(document.getElementById("headlinePollSelect").value));
+ if(item)display.innerHTML=`<strong>${esc(item.title)}</strong><div class="muted small">Live preview · unsaved changes</div><div class="section">${[["Favorable",f,"#55c59a"],["Unfavorable",u,"#ef7979"],["Neutral / unsure",n,"#9aabc0"]].map(([label,value,color])=>`<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><span>${label}</span><strong>${value.toFixed(1)}%</strong></div><div class="bar"><span style="width:${clamp(value)}%;background:${color}"></span></div></div>`).join("")}</div>`;
+}));
+document.getElementById("headlinePollSelect").onchange=renderHeadlinePoll;
+document.getElementById("saveHeadlinePoll").onclick=()=>{
+ ensureHeadlinePolls();
+ const id=Number(document.getElementById("headlinePollSelect").value);
+ const item=data.news.find(n=>n.id===id);
+ if(!item)return alert("Publish a news headline first.");
+ const favorable=Number(document.getElementById("headlineFavorable").value);
+ const neutral=Number(document.getElementById("headlineNeutral").value);
+ const unfavorable=Math.max(0,Math.round((100-favorable-neutral)*10)/10);
+ const sampleSize=Math.floor(Number(document.getElementById("headlineSampleSize").value));
+ if(!Number.isFinite(favorable)||!Number.isFinite(neutral)||favorable<0||neutral<0||favorable+neutral>100)
+  return alert("Favorable and neutral responses cannot exceed 100% combined.");
+ if(!Number.isFinite(sampleSize)||sampleSize<1)return alert("Enter a valid sample size.");
+ data.headlinePolls[id]={favorable,unfavorable,neutral,sampleSize};
+ save();
+ alert("Public reaction poll saved for this headline.");
+};
+function renderOpinion(){
+ ensureOpinion();renderHeadlinePoll();
+ document.getElementById("opinionMetrics").innerHTML=metric("Respondents",data.opinion.sampleSize.toLocaleString())+metric("Survey wave","Cycle "+(data.opinion.wave||data.cycle))+metric("Active news events",data.events.filter(e=>e.remaining>0).length)+metric("National poll change","Live","Updated by event-cycle impacts");
+ document.getElementById("opinionNational").innerHTML=parties.map(p=>`<div style="margin:12px 0"><div style="display:flex;justify-content:space-between">${partyTag(p.id)} <strong id="opinionPollValue_${p.id}">${Number(data.polls[p.id]).toFixed(1)}%</strong></div><input aria-label="${p.id} national polling share" type="range" min="0" max="100" step=".1" value="${data.polls[p.id]}" data-opinion-poll="${p.id}"><div class="bar"><span id="opinionPollBar_${p.id}" style="width:${clamp(data.polls[p.id])}%;background:${p.color}"></span></div></div>`).join("")+
+ `<p class="muted small">Adjust a party's polling share; the remaining parties automatically redistribute proportionally so the national total stays at 100%.</p><div class="toolbar"><button class="btn secondary" id="saveOpinionPollSliders">Save national polling adjustments</button></div>`;
+ document.querySelectorAll("[data-opinion-poll]").forEach(slider=>slider.addEventListener("input",()=>{
+  const id=slider.dataset.opinionPoll,desired=Number(slider.value),others=parties.filter(p=>p.id!==id),remaining=100-desired;
+  const oldTotal=others.reduce((sum,p)=>sum+Math.max(0,Number(data.polls[p.id]||0)),0);
+  data.polls[id]=desired;
+  others.forEach(p=>data.polls[p.id]=oldTotal>0?remaining*Math.max(0,Number(data.polls[p.id]||0))/oldTotal:remaining/others.length);
+  parties.forEach(p=>{
+   document.getElementById("opinionPollValue_"+p.id).textContent=Number(data.polls[p.id]).toFixed(1)+"%";
+   document.getElementById("opinionPollBar_"+p.id).style.width=clamp(data.polls[p.id])+"%";
+   const input=document.querySelector(`[data-opinion-poll="${p.id}"]`);if(input&&p.id!==id)input.value=data.polls[p.id];
+  });
+ }));
+ const saveOpinion=document.getElementById("saveOpinionPollSliders");
+ if(saveOpinion)saveOpinion.onclick=()=>{save();alert("National polling adjustments saved. Total support remains 100%.")};
+ const sel=document.getElementById("opinionBillSelect"),old=sel.value;
+ sel.innerHTML=data.bills.map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join("");
+ if(data.bills.some(b=>String(b.id)===old))sel.value=old;
+ const bill=data.bills.find(b=>b.id===Number(sel.value));
+ document.getElementById("opinionBillSummary").innerHTML=bill?`<strong>${esc(bill.title)}</strong><div class="metric">${Number(bill.publicSupport??50).toFixed(1)}%</div><div class="muted small">Estimated public support in the simulated national poll</div><div class="bar section"><span style="width:${clamp(bill.publicSupport??50)}%"></span></div>`:'<div class="empty">Create a bill in the National Assembly to track public support.</div>';
+ const supportSlider=document.getElementById("billSupportSlider"),supportSave=document.getElementById("saveBillSupport");
+ if(supportSlider){
+  supportSlider.disabled=!bill; supportSave.disabled=!bill;
+  supportSlider.value=bill?Number(bill.publicSupport??50):50;
+  document.getElementById("billSupportValue").textContent=(bill?Number(bill.publicSupport??50):50).toFixed(1)+"%";
+  document.getElementById("billSupportBar").style.width=(bill?clamp(bill.publicSupport??50):50)+"%";
+  const history=bill?(bill.publicSupportHistory||[]):[];
+  document.getElementById("billSupportHistory").innerHTML=history.length
+   ? "<strong>Recorded observations</strong><br>"+history.slice().reverse().slice(0,8).map(h=>`Cycle ${h.cycle}: ${Number(h.support).toFixed(1)}%`).join(" · ")
+   : "No saved observations yet. Move the slider and record the current public support.";
+ }
+ document.getElementById("opinionSample").textContent=Number(data.opinion.sampleSize).toLocaleString()+" respondents";
+ document.getElementById("opinionWave").textContent="Cycle "+(data.opinion.wave||data.cycle);
+ renderDemographicTable();
+}
+function renderDemographicTable(){
+ const dim=document.getElementById("demographicDimension").value;
+ const billId=document.getElementById("opinionBillSelect").value;
+ const groups=weightedGroupSupport(dim,billId);
+ document.getElementById("demographicTable").innerHTML=`<table><thead><tr><th>Group</th><th>Respondents</th>${parties.map(p=>`<th>${p.id}</th>`).join("")}<th>Bill support</th></tr></thead><tbody>${groups.map(g=>`<tr><td><strong>${esc(g.name)}</strong></td><td>${g.n.toLocaleString()}</td>${parties.map(p=>`<td>${Number(g.parties[p.id]).toFixed(1)}%</td>`).join("")}<td><strong>${Number(g.billSupport??50).toFixed(1)}%</strong></td></tr>`).join("")}</tbody></table><p class="muted small">Respondent counts are illustrative subgroup sample allocations. Party columns show within-group party preference. Bill support is shown for the selected bill, or the general baseline when no bill is selected.</p>`;
+}
+document.getElementById("demographicDimension").onchange=renderDemographicTable;
+document.getElementById("opinionBillSelect").onchange=renderOpinion;
+document.getElementById("billSupportSlider").addEventListener("input",e=>{
+ const v=Number(e.target.value);
+ document.getElementById("billSupportValue").textContent=v.toFixed(1)+"%";
+ document.getElementById("billSupportBar").style.width=v+"%";
+});
+document.getElementById("saveBillSupport").onclick=()=>{
+ const bill=data.bills.find(b=>b.id===Number(document.getElementById("opinionBillSelect").value));
+ if(!bill)return alert("Select a bill first.");
+ bill.publicSupport=Number(document.getElementById("billSupportSlider").value);
+ bill.publicSupportHistory=bill.publicSupportHistory||[];
+ bill.publicSupportHistory.push({cycle:data.cycle,support:bill.publicSupport,recordedAt:new Date().toISOString()});
+ save();alert("Public support recorded for "+bill.title+".");
+};
+
+// EVENT CYCLE ENGINE — one-time impacts apply at publication; ongoing impacts apply per cycle.
+function num(id){return Number(document.getElementById(id).value)||0}
+function clamp(v,min=0,max=100){return Math.max(min,Math.min(max,v))}
+function normalizePolls(changes){
+ let raw={};parties.forEach(p=>raw[p.id]=Math.max(0,Number(data.polls[p.id]||0)+(changes[p.id]||0)));
+ let total=Object.values(raw).reduce((a,b)=>a+b,0);
+ if(total<=0){parties.forEach(p=>raw[p.id]=0);raw.CRP=100;total=100}
+ parties.forEach(p=>data.polls[p.id]=Math.round(raw[p.id]/total*1000)/10);
+ let diff=Math.round((100-Object.values(data.polls).reduce((a,b)=>a+b,0))*10)/10;
+ data.polls.CRP=Math.round((data.polls.CRP+diff)*10)/10;
+}
+function applyEconomy(x){
+ let e=data.economy;
+ e.gdpChange=Number(e.gdpChange||0)+(x.gdp||0);
+ e.inflation=clamp(Number(e.inflation||0)+(x.inflation||0),-20,100);
+ e.industrial=clamp(Number(e.industrial||0)+(x.industrial||0),0,100);
+ e.manufacturing=clamp(Number(e.manufacturing||0)+(x.manufacturing||0),0,100);
+ e.spending=Math.max(0,Number(e.spending||0)+(x.spending||0));
+ e.fuel=Math.max(0,Number(e.fuel||0)+(x.fuel||0));
+}
+function renderEvents(){
+ document.getElementById("cycleMetrics").innerHTML=metric("Simulation cycle",data.cycle)+metric("Active events",data.events.filter(e=>e.remaining>0).length)+metric("Published event reports",data.events.length)+metric("Polling total",Object.values(data.polls).reduce((a,b)=>a+Number(b||0),0).toFixed(1)+"%");
+ document.getElementById("cycleNumber").textContent="Cycle "+data.cycle;
+ const eventBill=document.getElementById("eventBillSelect"),eventOld=eventBill.value;
+ eventBill.innerHTML='<option value="">No specific bill</option>'+data.bills.map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join("");
+ if(data.bills.some(b=>String(b.id)===eventOld))eventBill.value=eventOld;
+ document.getElementById("eventPollInputs").innerHTML=parties.map(p=>`<div><label>${p.id} polling shift (points)</label><input id="pollShift_${p.id}" type="number" step=".1" value="0"></div>`).join("");
+ document.getElementById("eventOngoingPollInputs").innerHTML=parties.map(p=>`<div><label>${p.id} polling shift / cycle</label><input id="onPollShift_${p.id}" type="number" step=".1" value="0"></div>`).join("");
+ let active=data.events.filter(e=>e.remaining>0);
+ document.getElementById("activeEvents").innerHTML=active.map(e=>`<div class="newsitem"><strong>${esc(e.title)}</strong><span class="muted small">${esc(e.category)} · ${e.remaining} cycle(s) remaining</span><div class="muted small">${esc(e.body)}</div><div class="toolbar"><button class="btn secondary" data-end-event="${e.id}">Resolve event</button><button class="btn danger" data-delete-event="${e.id}">Delete & reverse effects</button></div></div>`).join("")||'<div class="empty">No active developing events.</div>';
+ document.querySelectorAll("[data-end-event]").forEach(b=>b.onclick=()=>{let ev=data.events.find(x=>x.id===Number(b.dataset.endEvent));if(ev){ev.remaining=0;data.news.push({id:Date.now(),category:"Government Statement",title:"Event resolved: "+ev.title,body:"The event has been marked resolved in the simulation.",date:new Date().toLocaleDateString()});save()}});
+document.querySelectorAll("[data-delete-event]").forEach(b=>b.onclick=()=>deleteEventAndReverse(b.dataset.deleteEvent));
+ document.getElementById("eventHistory").innerHTML=data.events.slice().reverse().map(e=>`<div class="newsitem"><strong>${esc(e.title)}</strong><span class="muted small">${esc(e.category)} · Published cycle ${e.started} · ${e.remaining>0?e.remaining+" cycles remaining":"Concluded"}</span><div>${esc(e.body)}</div><div class="muted small">Immediate effects: GDP ${e.immediate.gdp>=0?"+":""}${e.immediate.gdp} pts · Inflation ${e.immediate.inflation>=0?"+":""}${e.immediate.inflation} pts · Fuel ${e.immediate.fuel>=0?"+":""}Π${e.immediate.fuel}${e.targetBillId?` · Bill support ${e.billImmediate>=0?"+":""}${e.billImmediate} pts`:""}</div><div class="toolbar"><button class="btn danger" data-delete-event="${e.id}">Delete & reverse effects</button></div></div>`).join("")||'<div class="empty">No event history yet.</div>';
+}
+document.getElementById("publishEvent").onclick=()=>{
+ let title=document.getElementById("eventTitle").value.trim(),body=document.getElementById("eventBody").value.trim();
+ if(!title||!body)return alert("Enter an event headline and report.");
+ let immediate={gdp:num("imGDP"),inflation:num("imInflation"),industrial:num("imIndustrial"),manufacturing:num("imManufacturing"),spending:num("imSpending"),fuel:num("imFuel")};
+ let ongoing={gdp:num("onGDP"),inflation:num("onInflation"),fuel:num("onFuel")};
+ let pollChanges={},ongoingPollChanges={};parties.forEach(p=>{pollChanges[p.id]=num("pollShift_"+p.id);ongoingPollChanges[p.id]=num("onPollShift_"+p.id)});
+ let targetBillId=Number(document.getElementById("eventBillSelect").value)||null;
+ let billImmediate=num("billSupportImmediate"),billOngoing=num("billSupportOngoing");
+ let duration=Math.max(1,Math.min(99,Math.floor(num("eventDuration")||1)));
+ let rollbackSnapshot=captureEventRollback();
+ applyEconomy(immediate);normalizePolls(pollChanges);applyOpinionShift(pollChanges);
+ if(targetBillId){
+  let target=data.bills.find(b=>b.id===targetBillId);
+  if(target){
+   target.publicSupport=clamp(Number(target.publicSupport??50)+billImmediate);
+   target.caucusSupport=target.caucusSupport||{};
+   parties.forEach(p=>target.caucusSupport[p.id]=clamp(Number(target.caucusSupport[p.id]??50)+pollChanges[p.id]*0.35+billImmediate*0.15));
+   Object.values(data.opinion.dimensions).forEach(groups=>groups.forEach((g,i)=>{
+    g.billSupportByBill=g.billSupportByBill||{};
+    if(typeof g.billSupportByBill[target.id]!=="number")g.billSupportByBill[target.id]=clamp(50+(i%4-1.5)*2);
+    g.billSupportByBill[target.id]=clamp(g.billSupportByBill[target.id]+billImmediate);
+   }));
+  }
+ }
+ let eventId=Date.now(),newsId=eventId+1;
+ let ev={id:eventId,newsId,title,body,category:document.getElementById("eventCategory").value,started:data.cycle,remaining:duration,immediate,ongoing,pollChanges,ongoingPollChanges,targetBillId,billImmediate,billOngoing,rollbackSnapshot};
+ data.events.push(ev);
+ data.news.push({id:newsId,title,body,category:ev.category,date:new Date().toLocaleDateString()});
+ save();alert("Event published. Its immediate economic and polling effects have been applied.");
+};
+document.getElementById("advanceCycle").onclick=async()=>{
+ if(!confirm("Advance from cycle "+data.cycle+" to cycle "+(data.cycle+1)+"? Ongoing effects from active events will be applied."))return;
+ data.cycle++;
+ let applied=0;
+ data.events.filter(e=>e.remaining>0).forEach(e=>{
+  applyEconomy(e.ongoing);normalizePolls(e.ongoingPollChanges||{});applyOpinionShift(e.ongoingPollChanges||{});
+  if(e.targetBillId&&e.billOngoing){
+   let b=data.bills.find(x=>x.id===e.targetBillId);
+   if(b){
+    b.publicSupport=clamp(Number(b.publicSupport??50)+e.billOngoing);
+    b.caucusSupport=b.caucusSupport||{};
+    parties.forEach(p=>b.caucusSupport[p.id]=clamp(Number(b.caucusSupport[p.id]??50)+(e.ongoingPollChanges?.[p.id]||0)*0.35+e.billOngoing*0.15));
+    Object.values(data.opinion.dimensions).forEach(groups=>groups.forEach((g,i)=>{
+     g.billSupportByBill=g.billSupportByBill||{};
+     if(typeof g.billSupportByBill[b.id]!=="number")g.billSupportByBill[b.id]=clamp(50+(i%4-1.5)*2);
+     g.billSupportByBill[b.id]=clamp(g.billSupportByBill[b.id]+e.billOngoing);
+    }));
+   }
+  }
+  e.remaining--;applied++;
+  if(e.remaining===0)data.news.push({id:Date.now()+Math.random(),category:"Politics",title:"Developing story concludes: "+e.title,body:"The event's scheduled simulation effects have ended. Its lasting economic and political consequences remain reflected in national indicators.",date:new Date().toLocaleDateString()});
+ });
+ data.opinion.wave=data.cycle;
+ (data.breakingNews||[]).filter(n=>n.remaining>0).forEach(n=>{
+  applyEconomy(n.ongoing||{});
+  applyBreakingMarketImpact(n.marketOngoing||0);
+  n.remaining--;
+  if(n.remaining===0)data.news.push({id:Date.now()+Math.random(),category:"BREAKING · "+n.category,title:"Breaking story concludes: "+n.title,body:"The scheduled Breaking News effects have ended. Its lasting economic and market consequences remain reflected in the simulation.",date:new Date().toLocaleDateString()});
+ });
+ await refreshGlobalMarkets({silent:true});
+ advanceStockExchange();
+ save();alert("Cycle "+data.cycle+" advanced. Ongoing effects applied for "+applied+" active event(s), and the Quamien Stock Exchange has updated.");
+};
+
+function renderAll(){renderOverview();renderAssembly();renderEconomy();renderMarket();renderElections();renderOpinion();renderNews();renderEvents()}
+renderAll();
+document.getElementById("refreshGlobalMarkets").onclick=()=>refreshGlobalMarkets();
+</script>
+</body></html>
